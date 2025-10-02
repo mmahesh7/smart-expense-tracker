@@ -25,7 +25,7 @@
 	                </div>
 	                <span class="text-xl font-bold text-gray-800">ExpenseTracker</span>
 	            </div>
-	
+
 	            <!-- User Menu -->
 	            <div class="flex items-center space-x-4">
 	                <span class="text-gray-700">Welcome, <strong>${sessionScope.fullName}</strong></span>
@@ -159,8 +159,8 @@
             </div>
         </div>
 
-        <!-- Charts and Recent Expenses -->
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        <!-- Charts Section - 3 Charts in Grid -->
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-8">
             <!-- Pie Chart -->
             <div class="bg-white rounded-xl shadow-sm p-6">
                 <h3 class="text-lg font-semibold text-gray-800 mb-4">Spending by Category</h3>
@@ -169,47 +169,85 @@
                 </div>
             </div>
 
-            <!-- Recent Expenses -->
+            <!-- Monthly Trend Chart -->
             <div class="bg-white rounded-xl shadow-sm p-6">
-                <div class="flex justify-between items-center mb-4">
-                    <h3 class="text-lg font-semibold text-gray-800">Recent Expenses</h3>
-                    <a href="view-expenses" class="text-indigo-600 text-sm hover:underline">View All</a>
+                <h3 class="text-lg font-semibold text-gray-800 mb-4">Monthly Spending Trend</h3>
+                <div class="h-80">
+                    <canvas id="monthlyTrendChart"></canvas>
                 </div>
-                <div class="space-y-4">
-                    <c:forEach var="expense" items="${recentExpenses}" end="4">
-                        <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-                            <div class="flex items-center space-x-3">
-                                <div class="w-10 h-10 ${expense.categoryColor} rounded-lg flex items-center justify-center">
-                                    <i class="${expense.categoryIcon} text-white text-sm"></i>
-                                </div>
-                                <div>
-                                    <p class="font-medium text-gray-800">${expense.categoryName}</p>
-                                    <p class="text-sm text-gray-500">
-                                        <c:choose>
-                                            <c:when test="${not empty expense.description}">${expense.description}</c:when>
-                                            <c:otherwise>No description</c:otherwise>
-                                        </c:choose>
-                                    </p>
-                                </div>
+            </div>
+
+            <!-- Budget Progress Chart -->
+            <div class="bg-white rounded-xl shadow-sm p-6">
+                <h3 class="text-lg font-semibold text-gray-800 mb-4">Budget Progress</h3>
+                <div class="h-80">
+                    <canvas id="budgetProgressChart"></canvas>
+                </div>
+                <c:if test="${not empty budgetStatus}">
+                    <div class="mt-4 grid grid-cols-3 gap-2 text-center text-sm">
+                        <div class="p-2 bg-gray-50 rounded">
+                            <p class="text-gray-500">Budget</p>
+                            <p class="font-semibold">₹<fmt:formatNumber value="${budgetStatus.budgetAmount}" pattern="#,##0.00"/></p>
+                        </div>
+                        <div class="p-2 bg-gray-50 rounded">
+                            <p class="text-gray-500">Spent</p>
+                            <p class="font-semibold">₹<fmt:formatNumber value="${budgetStatus.totalSpent}" pattern="#,##0.00"/></p>
+                        </div>
+                        <div class="p-2 bg-gray-50 rounded">
+                            <p class="text-gray-500">Remaining</p>
+                            <p class="font-semibold 
+                                <c:choose>
+                                    <c:when test="${budgetStatus.budgetAmount.subtract(budgetStatus.totalSpent).doubleValue() < 0}">text-red-600</c:when>
+                                    <c:otherwise>text-green-600</c:otherwise>
+                                </c:choose>">
+                                ₹<fmt:formatNumber value="${budgetStatus.budgetAmount.subtract(budgetStatus.totalSpent)}" pattern="#,##0.00"/>
+                            </p>
+                        </div>
+                    </div>
+                </c:if>
+            </div>
+        </div>
+
+        <!-- Recent Expenses Section -->
+        <div class="bg-white rounded-xl shadow-sm p-6">
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="text-lg font-semibold text-gray-800">Recent Expenses</h3>
+                <a href="view-expenses" class="text-indigo-600 text-sm hover:underline">View All</a>
+            </div>
+            <div class="space-y-4">
+                <c:forEach var="expense" items="${recentExpenses}" end="6">
+                    <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                        <div class="flex items-center space-x-3">
+                            <div class="w-10 h-10 ${expense.categoryColor} rounded-lg flex items-center justify-center">
+                                <i class="${expense.categoryIcon} text-white text-sm"></i>
                             </div>
-                            <div class="text-right">
-                                <p class="font-semibold text-gray-800">
-                                    ₹<fmt:formatNumber value="${expense.amount}" pattern="#,##0.00"/>
-                                </p>
+                            <div>
+                                <p class="font-medium text-gray-800">${expense.categoryName}</p>
                                 <p class="text-sm text-gray-500">
-                                    <fmt:formatDate value="${expense.expenseDateAsDate}" pattern="MMM dd"/>
+                                    <c:choose>
+                                        <c:when test="${not empty expense.description}">${expense.description}</c:when>
+                                        <c:otherwise>No description</c:otherwise>
+                                    </c:choose>
                                 </p>
                             </div>
                         </div>
-                    </c:forEach>
-                    <c:if test="${empty recentExpenses}">
-                        <div class="text-center py-8 text-gray-500">
-                            <i class="fas fa-receipt text-4xl mb-3 opacity-50"></i>
-                            <p>No recent expenses</p>
-                            <a href="add-expense" class="text-indigo-600 hover:underline mt-2 inline-block">Add your first expense</a>
+                        <div class="text-right">
+                            <p class="font-semibold text-gray-800">
+                                ₹<fmt:formatNumber value="${expense.amount}" pattern="#,##0.00"/>
+                            </p>
+                            <p class="text-sm text-gray-500">
+                                <fmt:formatDate value="${expense.expenseDateAsDate}" pattern="MMM dd"/>
+                            </p>
                         </div>
-                    </c:if>
-                </div>
+                    </div>
+                </c:forEach>
+                <c:if test="${empty recentExpenses}">
+                    <div class="text-center py-8 text-gray-500">
+                        <i class="fas fa-receipt text-4xl mb-3 opacity-50"></i>
+                        <p>No recent expenses</p>
+                        <a href="add-expense" class="text-indigo-600 hover:underline mt-2 inline-block">Add your first expense</a>
+                    </div>
+                </c:if>
             </div>
         </div>
     </div>
@@ -282,7 +320,156 @@
                 </div>
             `;
         }
+
+        // Monthly Trend Chart
+        const monthlyTrendData = [
+            <c:forEach var="month" items="${monthlyTrend}" varStatus="status">
+            {
+                month: "${month[0]}",
+                amount: parseFloat(${month[1]}),
+                label: "${month[2]}"
+            }<c:if test="${!status.last}">,</c:if>
+            </c:forEach>
+        ];
+
+        console.log("Monthly Trend Data:", monthlyTrendData);
+
+        if (monthlyTrendData.length > 0) {
+            const trendCtx = document.getElementById('monthlyTrendChart').getContext('2d');
+            
+            new Chart(trendCtx, {
+                type: 'line',
+                data: {
+                    labels: monthlyTrendData.map(item => item.month),
+                    datasets: [{
+                        label: 'Monthly Spending',
+                        data: monthlyTrendData.map(item => item.amount),
+                        borderColor: '#4f46e5',
+                        backgroundColor: 'rgba(79, 70, 229, 0.1)',
+                        borderWidth: 3,
+                        fill: true,
+                        tension: 0.4,
+                        pointBackgroundColor: '#4f46e5',
+                        pointBorderColor: '#ffffff',
+                        pointBorderWidth: 2,
+                        pointRadius: 6,
+                        pointHoverRadius: 8
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: false
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    return 'Spent: ₹' + context.raw.toFixed(2);
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            grid: {
+                                color: 'rgba(0, 0, 0, 0.1)'
+                            },
+                            ticks: {
+                                callback: function(value) {
+                                    return '₹' + value.toLocaleString();
+                                }
+                            }
+                        },
+                        x: {
+                            grid: {
+                                display: false
+                            }
+                        }
+                    }
+                }
+            });
+        } else {
+            const trendContainer = document.getElementById('monthlyTrendChart').parentElement;
+            trendContainer.innerHTML = `
+                <div class="flex items-center justify-center h-80 text-gray-500">
+                    <div class="text-center">
+                        <i class="fas fa-chart-line text-4xl mb-3 opacity-50"></i>
+                        <p>No trend data available</p>
+                        <p class="text-sm mt-1">Add expenses to see spending trends</p>
+                    </div>
+                </div>
+            `;
+        }
+
+        // Budget Progress Chart
+        <c:choose>
+            <c:when test="${not empty budgetStatus}">
+                const budgetCtx = document.getElementById('budgetProgressChart').getContext('2d');
+                const spent = parseFloat(${budgetStatus.totalSpent});
+                const budgetAmount = parseFloat(${budgetStatus.budgetAmount});
+                const remaining = Math.max(0, budgetAmount - spent);
+                
+                new Chart(budgetCtx, {
+                    type: 'doughnut',
+                    data: {
+                        labels: ['Spent', 'Remaining'],
+                        datasets: [{
+                            data: [spent, remaining],
+                            backgroundColor: [
+                                spent > budgetAmount ? '#ef4444' : '#f59e0b',
+                                '#10b981'
+                            ],
+                            borderWidth: 0
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        cutout: '70%',
+                        plugins: {
+                            legend: {
+                                position: 'bottom',
+                                labels: {
+                                    padding: 15,
+                                    usePointStyle: true,
+                                    font: {
+                                        size: 11
+                                    }
+                                }
+                            },
+                            tooltip: {
+                                callbacks: {
+                                    label: function(context) {
+                                        const label = context.label || '';
+                                        const value = context.raw || 0;
+                                        const total = spent + remaining;
+                                        const percentage = Math.round((value / total) * 100);
+                                        return label + ': ₹' + value.toFixed(2) + ' (' + percentage + '%)';
+                                    }
+                                }
+                            }
+                        }
+                    }
+                });
+            </c:when>
+            <c:otherwise>
+                const budgetContainer = document.getElementById('budgetProgressChart').parentElement;
+                budgetContainer.innerHTML = `
+                    <div class="flex items-center justify-center h-80 text-gray-500">
+                        <div class="text-center">
+                            <i class="fas fa-chart-pie text-4xl mb-3 opacity-50"></i>
+                            <p>No budget set</p>
+                            <a href="budget" class="text-indigo-600 hover:underline mt-2 inline-block">Set a budget</a>
+                        </div>
+                    </div>
+                `;
+            </c:otherwise>
+        </c:choose>
     </script>
+
     <script>
     // Dropdown toggle function
     function toggleDropdown() {
@@ -295,7 +482,7 @@
         const dropdown = document.getElementById('userDropdown');
         const button = event.target.closest('button');
         
-        if (!button && !dropdown.contains(event.target)) {
+        if (!button && dropdown && !dropdown.contains(event.target)) {
             dropdown.classList.add('hidden');
         }
     });

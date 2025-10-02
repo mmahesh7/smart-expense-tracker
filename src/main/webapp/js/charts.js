@@ -2,6 +2,12 @@
  * Chart.js utility functions for Smart Expense Tracker
  */
 
+// Initialize all dashboard charts
+function initializeDashboardCharts() {
+    // Charts are now initialized directly in the JSP
+    console.log("Dashboard charts initialized");
+}
+
 // Initialize category pie chart
 function initCategoryChart(canvasId, categoryData) {
     const canvas = document.getElementById(canvasId);

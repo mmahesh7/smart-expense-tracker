@@ -16,6 +16,7 @@ import javax.servlet.http.HttpSession;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -63,11 +64,15 @@ public class DashboardServlet extends HttpServlet {
             // Get budget status
             Budget budgetStatus = budgetDAO.getBudgetStatus(userId, currentMonth, currentYear);
             
+            // Get monthly trend data for last 6 months
+            List<Object[]> monthlyTrend = getMonthlyTrendData(userId, currentMonth, currentYear);
+            
             // Set attributes for JSP
             request.setAttribute("monthlyTotal", monthlyTotal);
             request.setAttribute("categorySpending", categorySpending);
             request.setAttribute("recentExpenses", recentExpenses);
             request.setAttribute("budgetStatus", budgetStatus);
+            request.setAttribute("monthlyTrend", monthlyTrend);
             request.setAttribute("currentMonth", now.getMonth().toString());
             request.setAttribute("currentYear", currentYear);
             
@@ -76,8 +81,37 @@ public class DashboardServlet extends HttpServlet {
             
         } catch (Exception e) {
             e.printStackTrace();
-            request.setAttribute("errorMessage", "Error loading dashboard data.");
+            request.setAttribute("errorMessage", "Error loading dashboard data: " + e.getMessage());
             request.getRequestDispatcher("/views/dashboard.jsp").forward(request, response);
         }
+    }
+    
+    /**
+     * Get monthly trend data for the last 6 months
+     */
+    private List<Object[]> getMonthlyTrendData(int userId, int currentMonth, int currentYear) {
+        List<Object[]> monthlyTrend = new ArrayList<>();
+        
+        // Get data for last 6 months
+        for (int i = 5; i >= 0; i--) {
+            LocalDate date = LocalDate.now().minusMonths(i);
+            int month = date.getMonthValue();
+            int year = date.getYear();
+            String monthName = date.getMonth().toString().substring(0, 3); // Short month name
+            
+            BigDecimal monthlyTotal = expenseDAO.getMonthlyTotal(userId, month, year);
+            if (monthlyTotal == null) {
+                monthlyTotal = BigDecimal.ZERO;
+            }
+            
+            Object[] monthData = new Object[3];
+            monthData[0] = monthName;              // Month name for display
+            monthData[1] = monthlyTotal;           // Total amount
+            monthData[2] = monthName + " " + year; // Full label
+            
+            monthlyTrend.add(monthData);
+        }
+        
+        return monthlyTrend;
     }
 }
