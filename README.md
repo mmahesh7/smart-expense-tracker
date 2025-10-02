@@ -11,8 +11,6 @@ A comprehensive full-stack web application for personal finance management built
 
 ## 🎥 Project Demo
 
-<!-- You can add screenshots and videos here -->
-
 <video controls src="SET_Demo.mp4" title="Demo_Recording"></video>
 ![Dashboard](preview/images/SET_Dashboard2.png)
 ---
